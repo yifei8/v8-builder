@@ -7,7 +7,6 @@ sudo apt-get install -y \
     curl \
     wget \
     build-essential \
-    python \
     xz-utils \
     zip
 
@@ -31,24 +30,25 @@ cd v8
 echo "=====[ Fetching V8 ]====="
 fetch v8
 echo "target_os = ['android']" >> .gclient
-cd ~/v8/v8
+cd v8
 ./build/install-build-deps-android.sh
 git checkout $VERSION
 gclient sync
 
 
 echo "=====[ Building V8 ]====="
-python ./tools/dev/v8gen.py arm.release -vv -- '
+python3 ./tools/dev/v8gen.py arm.release -vv -- '
 target_os = "android"
 target_cpu = "arm"
 v8_target_cpu = "arm"
-is_component_build = true
+is_component_build = false
 use_custom_libcxx = false
-v8_enable_i18n_support = true
+v8_enable_i18n_support = false
 v8_use_external_startup_data = false
-symbol_level = 1
+v8_symbol_level = 0
+v8_static_library = true
+v8_monolithic = true
 '
 ninja -C out.gn/arm.release -t clean
-ninja -C out.gn/arm.release v8_libplatform
-ninja -C out.gn/arm.release v8
+ninja -C out.gn/arm.release v8_monolith
 cp ./third_party/android_ndk/sources/cxx-stl/llvm-libc++/libs/armeabi-v7a/libc++_shared.so ./out.gn/arm.release

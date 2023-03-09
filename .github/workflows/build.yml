@@ -2,11 +2,15 @@ name: Build V8
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - "master"
     paths:
     - 'V8_VERSION'
     - 'builders/**'
     - '.github/workflows/build.yml'
+  pull_request:
+    branches:
+      - "master"
 
 jobs:
 
@@ -24,7 +28,7 @@ jobs:
   
   build_linux:
     name: Linux
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     needs: version_reader
     steps:
     - uses: actions/checkout@v2
@@ -36,16 +40,12 @@ jobs:
       with:
         name: linux_x86-64
         path: |
+          ~/v8/v8/out.gn/x64.release/obj/*.a
           ~/v8/v8/out.gn/x64.release/*.so
-          ~/v8/v8/out.gn/x64.release/*.dat
-          ~/v8/v8/out.gn/x64.release/bytecode_builtins_list_generator
-          ~/v8/v8/out.gn/x64.release/gen-regexp-special-case
-          ~/v8/v8/out.gn/x64.release/mksnapshot
-          ~/v8/v8/out.gn/x64.release/torque
 
   build_android_arm_v8:
     name: Android (arm64-v8a)
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     needs: version_reader
     steps:
     - uses: actions/checkout@v2
@@ -57,16 +57,12 @@ jobs:
       with:
         name: android_arm64-v8a
         path: |
+          ~/v8/v8/out.gn/arm64.release/obj/*.a
           ~/v8/v8/out.gn/arm64.release/*.so
-          ~/v8/v8/out.gn/arm64.release/*.dat
-          ~/v8/v8/out.gn/arm64.release/clang_*/bytecode_builtins_list_generator
-          ~/v8/v8/out.gn/arm64.release/clang_*/gen-regexp-special-case
-          ~/v8/v8/out.gn/arm64.release/clang_*/mksnapshot
-          ~/v8/v8/out.gn/arm64.release/clang_*/torque
 
   build_android_arm_v7:
     name: Android (armeabi-v7a)
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     needs: version_reader
     steps:
     - uses: actions/checkout@v2
@@ -78,16 +74,12 @@ jobs:
       with:
         name: android_armeabi-v7a
         path: |
+          ~/v8/v8/out.gn/arm.release/obj/*.a
           ~/v8/v8/out.gn/arm.release/*.so
-          ~/v8/v8/out.gn/arm.release/*.dat
-          ~/v8/v8/out.gn/arm.release/clang_*/bytecode_builtins_list_generator
-          ~/v8/v8/out.gn/arm.release/clang_*/gen-regexp-special-case
-          ~/v8/v8/out.gn/arm.release/clang_*/mksnapshot
-          ~/v8/v8/out.gn/arm.release/clang_*/torque
   
   build_android_x86_64:
     name: Android (x86-64)
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     needs: version_reader
     steps:
     - uses: actions/checkout@v2
@@ -99,16 +91,12 @@ jobs:
       with:
         name: android_x86-64
         path: |
+          ~/v8/v8/out.gn/x64.release/obj/*.a
           ~/v8/v8/out.gn/x64.release/*.so
-          ~/v8/v8/out.gn/x64.release/*.dat
-          ~/v8/v8/out.gn/x64.release/clang_*/bytecode_builtins_list_generator
-          ~/v8/v8/out.gn/x64.release/clang_*/gen-regexp-special-case
-          ~/v8/v8/out.gn/x64.release/clang_*/mksnapshot
-          ~/v8/v8/out.gn/x64.release/clang_*/torque
 
   build_android_x86:
     name: Android (x86)
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     needs: version_reader
     steps:
     - uses: actions/checkout@v2
@@ -120,16 +108,12 @@ jobs:
       with:
         name: android_x86
         path: |
+          ~/v8/v8/out.gn/ia32.release/obj/*.a
           ~/v8/v8/out.gn/ia32.release/*.so
-          ~/v8/v8/out.gn/ia32.release/*.dat
-          ~/v8/v8/out.gn/ia32.release/clang_*/bytecode_builtins_list_generator
-          ~/v8/v8/out.gn/ia32.release/clang_*/gen-regexp-special-case
-          ~/v8/v8/out.gn/ia32.release/clang_*/mksnapshot
-          ~/v8/v8/out.gn/ia32.release/clang_*/torque
 
   build_macos:
     name: macOS
-    runs-on: macos-10.15
+    runs-on: macos-12
     needs: version_reader
     steps:
     - uses: actions/checkout@v2
@@ -141,12 +125,7 @@ jobs:
       with:
         name: macos
         path: |
-          ~/v8/v8/out.gn/x64.release/*.dylib
-          ~/v8/v8/out.gn/x64.release/*.dat
-          ~/v8/v8/out.gn/x64.release/bytecode_builtins_list_generator
-          ~/v8/v8/out.gn/x64.release/gen-regexp-special-case
-          ~/v8/v8/out.gn/x64.release/mksnapshot
-          ~/v8/v8/out.gn/x64.release/torque
+          ~/v8/v8/out.gn/x64.release/obj/*.a
 
   build_windows:
     name: Windows
@@ -163,17 +142,11 @@ jobs:
       with:
         name: windows
         path: |
-          v8/v8/out.gn/x64.release/*.dll
-          v8/v8/out.gn/x64.release/*.pdb
-          v8/v8/out.gn/x64.release/*.lib
-          v8/v8/out.gn/x64.release/*.exp
-          v8/v8/out.gn/x64.release/*.ilk
-          v8/v8/out.gn/x64.release/*.exe
-          v8/v8/out.gn/x64.release/*.dat
+          v8/v8/out.gn/x64.release/obj/*.lib
 
   headers_and_documentation:
     name: Headers and Documentation
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     needs: version_reader
     steps:
     - uses: actions/checkout@v2
@@ -189,13 +162,12 @@ jobs:
       with:
         name: license
         path: '~/v8/v8/LICENSE.v8'
-    - uses: actions/upload-artifact@v2
-      with:
-        name: documentation
-        path: '~/docs'
 
   release:
     name: Release
+    if: >-
+      startsWith(github.event.head_commit.message, '[Release]') &&
+      github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     needs: [
       version_reader,
