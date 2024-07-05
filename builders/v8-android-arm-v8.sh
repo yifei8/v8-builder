@@ -63,16 +63,14 @@ echo "=====ls root====="
 ls -l
 echo "=====cd third_party====="
 ls ./third_party -l
-echo "=====cd third_party/android_toolchain====="
-ls ./third_party/android_toolchain -l
-echo "=====cd third_party/android_sdk/public====="
-ls ./third_party/android_sdk/public -l
-echo "=====cd third_party/libc++====="
-ls ./third_party/libc++ -l
-echo "=====cd third_party/llvm-build====="
-ls ./third_party/llvm-build -l
-echo "=====cd third_party/libc++abi====="
-ls ./third_party/libc++abi -l
+echo "=====cd third_party/android_toolchain/ndk====="
+ls ./third_party/android_toolchain/ndk -l
+echo "=====cd third_party/android_sdk/public/sources====="
+ls ./third_party/android_sdk/public/sources -l
+echo "=====cd third_party/libc++/src====="
+ls ./third_party/libc++/src -l
+echo "=====cd third_party/libc++abi/src====="
+ls ./third_party/libc++abi/src -l
 
 #abseil-cpp
 #android_platform
