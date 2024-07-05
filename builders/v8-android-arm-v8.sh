@@ -59,14 +59,14 @@ gclient sync
 
 echo "=====[ Building ls dir ]====="
 
-echo "ls root"
+echo "=====ls root====="
 ls -l
-echo "cd third_party"
-ls ./v8/third_party -l
-echo "cd android_platform"
-ls ./android_platform -l
-echo "cd android_sdk"
-ls ./android_sdk -l
+echo "=====cd third_party====="
+ls ./third_party -l
+echo "=====cd third_party/android_platform====="
+ls ./third_party/android_platform -l
+echo "=====cd third_party/android_sdk====="
+ls ./third_party/android_sdk -l
 
 #abseil-cpp
 #android_platform
