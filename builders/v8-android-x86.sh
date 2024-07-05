@@ -51,4 +51,4 @@ v8_monolithic = true
 '
 ninja -C out.gn/ia32.release -t clean
 ninja -C out.gn/ia32.release v8_monolith
-cp ./third_party/android_ndk/sources/cxx-stl/llvm-libc++/libs/x86/libc++_shared.so ./out.gn/ia32.release
+#cp ./third_party/android_ndk/sources/cxx-stl/llvm-libc++/libs/x86/libc++_shared.so ./out.gn/ia32.release
