@@ -43,57 +43,6 @@ jobs:
           ~/v8/v8/out.gn/arm64.release/obj/*.a
           ~/v8/v8/out.gn/arm64.release/*.so
 
-  build_android_arm_v7:
-    name: Android (armeabi-v7a)
-    runs-on: ubuntu-20.04
-    needs: version_reader
-    steps:
-    - uses: actions/checkout@v2
-    - name: Run build script
-      run: |
-        cd $GITHUB_WORKSPACE
-        sh ./builders/v8-android-arm-v7.sh ${{ needs.version_reader.outputs.v8_version }}
-    - uses: actions/upload-artifact@v2
-      with:
-        name: android_armeabi-v7a
-        path: |
-          ~/v8/v8/out.gn/arm.release/obj/*.a
-          ~/v8/v8/out.gn/arm.release/*.so
-  
-  build_android_x86_64:
-    name: Android (x86-64)
-    runs-on: ubuntu-20.04
-    needs: version_reader
-    steps:
-    - uses: actions/checkout@v2
-    - name: Run build script
-      run: |
-        cd $GITHUB_WORKSPACE
-        sh ./builders/v8-android-x86-64.sh ${{ needs.version_reader.outputs.v8_version }}
-    - uses: actions/upload-artifact@v2
-      with:
-        name: android_x86-64
-        path: |
-          ~/v8/v8/out.gn/x64.release/obj/*.a
-          ~/v8/v8/out.gn/x64.release/*.so
-
-  build_android_x86:
-    name: Android (x86)
-    runs-on: ubuntu-20.04
-    needs: version_reader
-    steps:
-    - uses: actions/checkout@v2
-    - name: Run build script
-      run: |
-        cd $GITHUB_WORKSPACE
-        sh ./builders/v8-android-x86.sh ${{ needs.version_reader.outputs.v8_version }}
-    - uses: actions/upload-artifact@v2
-      with:
-        name: android_x86
-        path: |
-          ~/v8/v8/out.gn/ia32.release/obj/*.a
-          ~/v8/v8/out.gn/ia32.release/*.so
-
   headers_and_documentation:
     name: Headers and Documentation
     runs-on: ubuntu-20.04
