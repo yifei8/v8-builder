@@ -26,22 +26,26 @@ jobs:
         cd $GITHUB_WORKSPACE
         echo "::set-output name=version::$(<./V8_VERSION)"
 
-  build_android_arm_v8:
-    name: Android (arm64-v8a)
+  build_android_arm_v7:
+    name: Android (armeabi-v7a)
     runs-on: ubuntu-20.04
     needs: version_reader
     steps:
     - uses: actions/checkout@v2
+    - name: fix libatomic.so.1
+      run: |
+         dnf install gcc
+         yum install libatomic
     - name: Run build script
       run: |
         cd $GITHUB_WORKSPACE
-        sh ./builders/v8-android-arm-v8.sh ${{ needs.version_reader.outputs.v8_version }}
+        sh ./builders/v8-android-arm-v7.sh ${{ needs.version_reader.outputs.v8_version }}
     - uses: actions/upload-artifact@v2
       with:
-        name: android_arm64-v8a
+        name: android_armeabi-v7a
         path: |
-          ~/v8/v8/out.gn/arm64.release/obj/*.a
-          ~/v8/v8/out.gn/arm64.release/*.so
+          ~/v8/v8/out.gn/arm.release/obj/*.a
+          ~/v8/v8/out.gn/arm.release/*.so
 
   headers_and_documentation:
     name: Headers and Documentation
