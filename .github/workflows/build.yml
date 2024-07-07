@@ -34,7 +34,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: fix libatomic.so.1
       run: |
-         dnf install gcc
          yum install libatomic
     - name: Run build script
       run: |
