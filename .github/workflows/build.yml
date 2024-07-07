@@ -34,7 +34,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: fix libatomic.so.1
       run: |
-         yum install libatomic
+         apt install libatomic1
     - name: Run build script
       run: |
         cd $GITHUB_WORKSPACE
