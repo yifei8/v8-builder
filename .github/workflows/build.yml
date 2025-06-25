@@ -1,152 +1,64 @@
-name: Build V8
+name: Build FFmpeg for Android2
 
 on:
   push:
     branches:
-      - "master"
-    paths:
-    - 'V8_VERSION'
-    - 'builders/**'
-    - '.github/workflows/build.yml'
+      - main
   pull_request:
-    branches:
-      - "master"
 
 jobs:
-
-  version_reader:
-    name: Get version number
+  build:
     runs-on: ubuntu-latest
-    outputs:
-      v8_version: ${{ steps.got_version.outputs.version }}
-    steps:
-    - uses: actions/checkout@v2
-    - id: got_version
-      run: |
-        cd $GITHUB_WORKSPACE
-        echo "::set-output name=version::$(<./V8_VERSION)"
 
-  build_android_arm_v8:
-    name: Android (arm64-v8a)
-    runs-on: ubuntu-20.04
-    needs: version_reader
-    steps:
-    - uses: actions/checkout@v2
-    - name: Run build script
-      run: |
-        cd $GITHUB_WORKSPACE
-        sh ./builders/v8-android-arm-v8.sh ${{ needs.version_reader.outputs.v8_version }}
-    - uses: actions/upload-artifact@v2
-      with:
-        name: android_arm64-v8a
-        path: |
-          ~/v8/v8/out.gn/arm64.release/obj/*.a
-          ~/v8/v8/out.gn/arm64.release/*.so
+    env:
+      ANDROID_NDK_VERSION: r25c
+      ANDROID_API_LEVEL: 21
+      ARCH: arm64-v8a
 
-  build_android_arm_v7:
-    name: Android (armeabi-v7a)
-    runs-on: ubuntu-20.04
-    needs: version_reader
     steps:
-    - uses: actions/checkout@v2
-    - name: Run build script
-      run: |
-        cd $GITHUB_WORKSPACE
-        sh ./builders/v8-android-arm-v7.sh ${{ needs.version_reader.outputs.v8_version }}
-    - uses: actions/upload-artifact@v2
-      with:
-        name: android_armeabi-v7a
-        path: |
-          ~/v8/v8/out.gn/arm.release/obj/*.a
-          ~/v8/v8/out.gn/arm.release/*.so
-  
-  build_android_x86_64:
-    name: Android (x86-64)
-    runs-on: ubuntu-20.04
-    needs: version_reader
-    steps:
-    - uses: actions/checkout@v2
-    - name: Run build script
-      run: |
-        cd $GITHUB_WORKSPACE
-        sh ./builders/v8-android-x86-64.sh ${{ needs.version_reader.outputs.v8_version }}
-    - uses: actions/upload-artifact@v2
-      with:
-        name: android_x86-64
-        path: |
-          ~/v8/v8/out.gn/x64.release/obj/*.a
-          ~/v8/v8/out.gn/x64.release/*.so
+      - name: Checkout source
+        uses: actions/checkout@v3
 
-  build_android_x86:
-    name: Android (x86)
-    runs-on: ubuntu-20.04
-    needs: version_reader
-    steps:
-    - uses: actions/checkout@v2
-    - name: Run build script
-      run: |
-        cd $GITHUB_WORKSPACE
-        sh ./builders/v8-android-x86.sh ${{ needs.version_reader.outputs.v8_version }}
-    - uses: actions/upload-artifact@v2
-      with:
-        name: android_x86
-        path: |
-          ~/v8/v8/out.gn/ia32.release/obj/*.a
-          ~/v8/v8/out.gn/ia32.release/*.so
+      - name: Set up NDK
+        run: |
+          wget https://dl.google.com/android/repository/android-ndk-${ANDROID_NDK_VERSION}-linux.zip
+          unzip -q android-ndk-${ANDROID_NDK_VERSION}-linux.zip
+          mv android-ndk-${ANDROID_NDK_VERSION} ${GITHUB_WORKSPACE}/android-ndk
+          echo "NDK path: ${GITHUB_WORKSPACE}/android-ndk"
 
-  headers_and_documentation:
-    name: Headers and Documentation
-    runs-on: ubuntu-20.04
-    needs: version_reader
-    steps:
-    - uses: actions/checkout@v2
-    - name: Generate documentation
-      run: |
-        cd $GITHUB_WORKSPACE
-        sh ./builders/v8-docs.sh ${{ needs.version_reader.outputs.v8_version }}
-    - uses: actions/upload-artifact@v2
-      with:
-        name: headers
-        path: '~/v8/v8/include'
-    - uses: actions/upload-artifact@v2
-      with:
-        name: license
-        path: '~/v8/v8/LICENSE.v8'
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yasm pkg-config
 
-  release:
-    name: Release
-    if: >-
-      startsWith(github.event.head_commit.message, '[Release]') &&
-      github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    needs: [
-      version_reader,
-      build_android_arm_v8, build_android_arm_v7, build_android_x86_64, build_android_x86,
-      headers_and_documentation
-    ]
-    steps:
-    - uses: actions/download-artifact@v2
-      with:
-        path: 'v8'
-    - name: Make zip
-      run: |
-        zip -r v8_engine.zip v8
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ needs.version_reader.outputs.v8_version }}
-        release_name: V8 engine, version ${{ needs.version_reader.outputs.v8_version }}
-        draft: true
-        prerelease: false
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: v8_engine.zip
-        asset_name: v8_engine_${{ needs.version_reader.outputs.v8_version }}.zip
-        asset_content_type: application/zip
+      - name: Build FFmpeg
+        run: |
+          export NDK=${GITHUB_WORKSPACE}/android-ndk
+          export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/linux-x86_64
+          export API=${ANDROID_API_LEVEL}
+          
+          mkdir -p build/ffmpeg-android
+          cd build/ffmpeg-android
+
+          # 假设 FFmpeg 源码在主目录 ffmpeg 文件夹
+          ../../ffmpeg/configure \
+            --prefix=$PWD/install \
+            --target-os=android \
+            --arch=aarch64 \
+            --cpu=armv8-a \
+            --cross-prefix=$TOOLCHAIN/bin/aarch64-linux-android- \
+            --cc=$TOOLCHAIN/bin/aarch64-linux-android${API}-clang \
+            --enable-cross-compile \
+            --disable-debug \
+            --disable-doc \
+            --disable-programs \
+            --enable-shared
+
+          make -j$(nproc)
+          make install
+
+      - name: Upload FFmpeg build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ffmpeg-android-${{ env.ARCH }}
+          path: build/ffmpeg-android/install
