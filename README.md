@@ -1,4 +1,4 @@
-# V8 Builder
+# V8 Builder2
 #### An automatic [V8 engine](https://v8.dev) builder via [Github Actions](https://github.com/features/actions)
 
 [![Build V8](https://github.com/htynkn/v8-builder/actions/workflows/build.yml/badge.svg)](https://github.com/htynkn/v8-builder/actions/workflows/build.yml)
