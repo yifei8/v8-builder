@@ -1,4 +1,4 @@
-name: Build FFmpeg for Android
+name: Build FFmpeg for Android 2
 
 on:
   push:
