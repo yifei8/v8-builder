@@ -1,0 +1,65 @@
+name: Build FFmpeg for Android
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      ANDROID_NDK_VERSION: r25c
+      ANDROID_API_LEVEL: 21
+      ARCH: arm64-v8a
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+
+      - name: Set up NDK
+        run: |
+          wget https://dl.google.com/android/repository/android-ndk-${ANDROID_NDK_VERSION}-linux.zip
+          unzip -q android-ndk-${ANDROID_NDK_VERSION}-linux.zip
+          mv android-ndk-${ANDROID_NDK_VERSION} ${GITHUB_WORKSPACE}/android-ndk
+          echo "NDK path: ${GITHUB_WORKSPACE}/android-ndk"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y yasm pkg-config
+
+      - name: Build FFmpeg
+        run: |
+          export NDK=${GITHUB_WORKSPACE}/android-ndk
+          export TOOLCHAIN=$NDK/toolchains/llvm/prebuilt/linux-x86_64
+          export API=${ANDROID_API_LEVEL}
+          
+          mkdir -p build/ffmpeg-android
+          cd build/ffmpeg-android
+
+          # 假设 FFmpeg 源码在主目录 ffmpeg 文件夹
+          ../../ffmpeg/configure \
+            --prefix=$PWD/install \
+            --target-os=android \
+            --arch=aarch64 \
+            --cpu=armv8-a \
+            --cross-prefix=$TOOLCHAIN/bin/aarch64-linux-android- \
+            --cc=$TOOLCHAIN/bin/aarch64-linux-android${API}-clang \
+            --enable-cross-compile \
+            --disable-debug \
+            --disable-doc \
+            --disable-programs \
+            --enable-shared
+
+          make -j$(nproc)
+          make install
+
+      - name: Upload FFmpeg build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ffmpeg-android-${{ env.ARCH }}
+          path: build/ffmpeg-android/install
+
